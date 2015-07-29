@@ -552,5 +552,26 @@ func ExampleMock_Timer() {
 	// Count is 1 after 10 seconds
 }
 
+func TestMock_Timer(t *testing.T) {
+	// Create a new mock clock.
+	clock := NewMock()
+
+	tA := clock.Timer(0)
+	clock.Add(time.Microsecond)
+	<-tA.C
+	wasRunning := tA.Reset(time.Millisecond)
+	if wasRunning != false {
+		t.Fatal("timer.Stop returned true after timer fired")
+	}
+	tX := clock.Timer(3 * time.Millisecond)
+	clock.Add(2 * time.Millisecond)
+
+	select {
+	case <-tA.C:
+	case <-tX.C:
+		t.Fatal("3 < 1")
+	}
+}
+
 func warn(v ...interface{})              { fmt.Fprintln(os.Stderr, v...) }
 func warnf(msg string, v ...interface{}) { fmt.Fprintf(os.Stderr, msg+"\n", v...) }

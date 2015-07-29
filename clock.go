@@ -188,24 +188,31 @@ func (m *Mock) Ticker(d time.Duration) *Ticker {
 
 // Timer creates a new instance of Timer.
 func (m *Mock) Timer(d time.Duration) *Timer {
-	m.mu.Lock()
-	defer m.mu.Unlock()
 	ch := make(chan time.Time, 1)
 	t := &Timer{
 		C:    ch,
 		c:    ch,
 		mock: m,
-		next: m.now.Add(d),
+		next: m.Now().Add(d),
 	}
-	m.timers = append(m.timers, (*internalTimer)(t))
+	m.addTimer((*internalTimer)(t))
 	return t
 }
 
-func (m *Mock) removeClockTimer(t clockTimer) {
+func (m *Mock) addTimer(t *internalTimer) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
+	m.timers = append(m.timers, t)
+	sort.Sort(m.timers)
+}
+
+func (m *Mock) removeClockTimer(t clockTimer) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	ret := false
 	for i, timer := range m.timers {
 		if timer == t {
+			ret = true
 			copy(m.timers[i:], m.timers[i+1:])
 			m.timers[len(m.timers)-1] = nil
 			m.timers = m.timers[:len(m.timers)-1]
@@ -213,6 +220,7 @@ func (m *Mock) removeClockTimer(t clockTimer) {
 		}
 	}
 	sort.Sort(m.timers)
+	return ret
 }
 
 // clockTimer represents an object with an associated start time.
@@ -239,12 +247,25 @@ type Timer struct {
 	fn    func()      // AfterFunc function, if set
 }
 
-// Stop turns off the ticker.
+// Stop turns off the timer.
 func (t *Timer) Stop() {
 	if t.timer != nil {
 		t.timer.Stop()
 	} else {
 		t.mock.removeClockTimer((*internalTimer)(t))
+	}
+}
+
+// Reset changes the timer to expire after duration d. It returns true if the
+// timer had been active, false if the timer had expired or been stopped.
+func (t *Timer) Reset(d time.Duration) bool {
+	if t.timer != nil {
+		return t.timer.Reset(d)
+	} else {
+		ret := t.mock.removeClockTimer((*internalTimer)(t))
+		t.next = t.mock.Now().Add(d)
+		t.mock.addTimer((*internalTimer)(t))
+		return ret
 	}
 }
 
