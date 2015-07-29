@@ -203,7 +203,6 @@ func (m *Mock) addTimer(t *internalTimer) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.timers = append(m.timers, t)
-	sort.Sort(m.timers)
 }
 
 func (m *Mock) removeClockTimer(t clockTimer) bool {
@@ -248,12 +247,11 @@ type Timer struct {
 }
 
 // Stop turns off the timer.
-func (t *Timer) Stop() {
+func (t *Timer) Stop() bool {
 	if t.timer != nil {
-		t.timer.Stop()
-	} else {
-		t.mock.removeClockTimer((*internalTimer)(t))
+		return t.timer.Stop()
 	}
+	return t.mock.removeClockTimer((*internalTimer)(t))
 }
 
 // Reset changes the timer to expire after duration d. It returns true if the
@@ -261,12 +259,11 @@ func (t *Timer) Stop() {
 func (t *Timer) Reset(d time.Duration) bool {
 	if t.timer != nil {
 		return t.timer.Reset(d)
-	} else {
-		ret := t.mock.removeClockTimer((*internalTimer)(t))
-		t.next = t.mock.Now().Add(d)
-		t.mock.addTimer((*internalTimer)(t))
-		return ret
 	}
+	ret := t.mock.removeClockTimer((*internalTimer)(t))
+	t.next = t.mock.Now().Add(d)
+	t.mock.addTimer((*internalTimer)(t))
+	return ret
 }
 
 type internalTimer Timer
