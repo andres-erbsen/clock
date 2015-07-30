@@ -1,4 +1,4 @@
-clock [![Build Status](https://drone.io/github.com/andres-erbsen/clock/status.png)](https://drone.io/github.com/andres-erbsen/clock/latest) [![Coverage Status](https://coveralls.io/repos/andres-erbsen/clock/badge.png?branch=master)](https://coveralls.io/r/andres-erbsen/clock?branch=master) [![GoDoc](https://godoc.org/github.com/andres-erbsen/clock?status.png)](https://godoc.org/github.com/andres-erbsen/clock) ![Project status](http://img.shields.io/status/experimental.png?color=red)
+clock [![Build Status](https://travis-ci.org/andres-erbsen/clock.svg)](https://travis-ci.org/andres-erbsen/clock) [![Coverage Status](https://coveralls.io/repos/andres-erbsen/clock/badge.png?branch=master)](https://coveralls.io/r/andres-erbsen/clock?branch=master) [![GoDoc](https://godoc.org/github.com/andres-erbsen/clock?status.png)](https://godoc.org/github.com/andres-erbsen/clock) ![Project status](http://img.shields.io/status/experimental.png?color=red)
 =====
 
 Clock is a small library for mocking time in Go. It provides an interface
