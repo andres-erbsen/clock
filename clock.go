@@ -273,7 +273,10 @@ func (t *internalTimer) Tick(now time.Time) {
 	if t.fn != nil {
 		t.fn()
 	} else {
-		t.c <- now
+		select {
+		case t.c <- now:
+		default:
+		}
 	}
 	t.mock.removeClockTimer((*internalTimer)(t))
 	gosched()
