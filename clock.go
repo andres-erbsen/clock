@@ -87,7 +87,7 @@ func (m *Mock) Add(d time.Duration) {
 	gosched()
 }
 
-// Sets the current time of the mock clock to a specific one.
+// Set sets the current time of the mock clock to a specific one.
 // This should only be called from a single goroutine at a time.
 func (m *Mock) Set(t time.Time) {
 	// Continue to execute timers until there are no more before the new time.
